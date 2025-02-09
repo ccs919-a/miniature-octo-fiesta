@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>氣體擴散模擬器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .simulator {
+            display: flex;
+            flex-direction: row;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .simulation-area {
+            position: relative;
+            width: 600px;
+            height: 450px;
+            border: 2px solid #fff;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        .control-panel {
+            margin-left: 20px;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            width: 220px;
+            color: white;
+        }
+
+        .control-panel h2 {
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .control-panel label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .control-panel input {
+            width: 100%;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .control-panel button {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            background-color: #444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .control-panel button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="simulator">
+        <div class="simulation-area">
+            <canvas id="simulationCanvas" width="600" height="450"></canvas>
+        </div>
+        <div class="control-panel">
+            <h2>模擬參數</h2>
+            <label>粒子數量:</label>
+            <input type="number" id="particle-count" value="50" min="10" max="200">
+            <button onclick="resetSimulation()">重置模擬</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("simulationCanvas");
+            const ctx = canvas.getContext("2d");
+            const particleCountInput = document.getElementById("particle-count");
+            
+            let particles = [];
+            let numParticles = parseInt(particleCountInput.value);
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.radius = 5;
+                    this.color = "rgba(255, 0, 0, 0.8)";
+                    this.vx = (Math.random() - 0.5) * 2;
+                    this.vy = (Math.random() - 0.5) * 2;
+                }
+                
+                move() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+                
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+            
+            function createParticles() {
+                particles = [];
+                numParticles = parseInt(particleCountInput.value);
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push(new Particle());
+                }
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.move();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+            
+            function resetSimulation() {
+                createParticles();
+            }
+            
+            particleCountInput.addEventListener("change", resetSimulation);
+            
+            createParticles();
+            animate();
+        });
+    </script>
+</body>
+</html>
